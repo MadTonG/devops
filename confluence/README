@@ -1,0 +1,63 @@
+# Confluence
+
+- Long Term Support
+- v7.9.5 LTS
+- x86_64
+## 环境
+- docker: 17.09.0+
+- docker-compose: 1.24.0+
+
+## 安装
+- 启动容器
+```bash
+$ git clone https://github.com/ \
+    && cd confluence
+    && docker-compose up -d
+```
+- 默认数据库配置
+```yaml
+driver=mysql5.7
+host=mysql-confluence
+port=3306
+db=confluence
+user=root
+password=passwd
+```
+
+## 破解
+- Confluence
+```bash
+$ docker exec confluence-srv java -jar /opt/atlassian/agent/atlassian-agent.jar \
+    -p conf
+    -m user@email.com
+    -n orientation
+    -o http://website
+    -s SERVER-ID
+```
+- 插件
+1. 下载插件，手动安装到confluence（离线）
+2. 查看插件 `APP Key`，例如：`eu.softwareplant.biggantt`
+3. 执行命令：
+```bash
+$ docker exec confluence-srv java -jar /opt/atlassian/agent/atlassian-agent.jar \
+    -p eu.softwareplant.biggantt \
+    -m user@email.com \
+    -n orientation \
+    -o http://website \
+    -s SERVER-ID \
+```
+4. 复制粘贴 `license`
+
+## 升级
+```bash
+$ cd ~/confluence && git pull
+$ docker pull xxx/confluence:7.19 && docker-compose stop
+$ docker-compose rm
+```
+输入 `y`，然后启动容器：
+```bash
+$ docker-compose up -d
+```
+
+## 备份
+>TODO
