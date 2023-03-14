@@ -2,6 +2,7 @@ version: "3"
 services:
   mysql:
     image: mysql:8
+    container_name: mysql
     volumes:
       - mysql-storage:/var/lib/mysql
     restart: always
@@ -12,9 +13,15 @@ services:
       MYSQL_DATABASE: devlake
       MYSQL_USER: merico
       MYSQL_PASSWORD: merico
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "10"
     
   grafana:
     image: apache/devlake-dashboard:${DEVLAKE_VERSION}
+    container_name: devlake-dashboard
     ports:
       - 3000:3000
     volumes:
@@ -27,9 +34,15 @@ services:
     restart: always
     depends_on:
       - mysql
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "10"
 
   devlake:
     image: apache/devlake:${DEVLAKE_VERSION}
+    container_name: devlake
     ports:
       - 9000:8080
     restart: always
@@ -41,9 +54,15 @@ services:
       API_TIMEOUT: "600s"
     depends_on:
       - mysql
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "10"
   
   config-ui:
     image: apache/devlake-config-ui:${DEVLAKE_VERSION}
+    container_name: devlake-config-ui
     ports:
       - 4000:4000
     env_file:
@@ -53,6 +72,11 @@ services:
       GRAFANA_ENDPOINT: grafana:3000
     depends_on:
       - devlake
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "10"
 
 volumes:
   mysql-storage:
