@@ -1,0 +1,59 @@
+version: "3"
+services:
+  mysql:
+    image: mysql:8
+    volumes:
+      - mysql-storage:/var/lib/mysql
+    restart: always
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: devlake
+      MYSQL_USER: merico
+      MYSQL_PASSWORD: merico
+    
+  grafana:
+    image: apache/devlake-dashboard:${DEVLAKE_VERSION}
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    environment:
+      GF_SERVER_ROOT_URL: "http://localhost:4000/grafana"
+      MYSQL_DATABASE: lake
+      MYSQL_USER: merico
+      MYSQL_PASSWORD: merico
+    restart: always
+    depends_on:
+      - mysql
+
+  devlake:
+    image: apache/devlake:${DEVLAKE_VERSION}
+    ports:
+      - 9000:8080
+    restart: always
+    volumes:
+      - ./.env:/app/.env
+      - ./logs:/app/logs
+    environment:
+      LOGGING_DIR: /app/logs
+      API_TIMEOUT: "600s"
+    depends_on:
+      - mysql
+  
+  config-ui:
+    image: apache/devlake-config-ui:${DEVLAKE_VERSION}
+    ports:
+      - 4000:4000
+    env_file:
+      - ./.env
+    environment:
+      DEVLAKE_ENDPOINT: devlake:8080
+      GRAFANA_ENDPOINT: grafana:3000
+    depends_on:
+      - devlake
+
+volumes:
+  mysql-storage:
+  grafana-storage:
